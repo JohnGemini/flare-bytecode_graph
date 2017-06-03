@@ -148,13 +148,13 @@ class BytecodeGraph():
         if linenos == []:
             return
 
-        current_addr, current_lineno = linenos.pop(0)
-        current_addr, next_lineno = linenos.pop(0)
+        current_lineno = self.code.co_firstlineno
+        next_addr, next_lineno = linenos.pop(0)
         for x in self.nodes():
-            if x.addr >= current_addr:
+            if x.addr >= next_addr:
                 current_lineno = next_lineno
                 if len(linenos) != 0:
-                    current_addr, next_lineno = linenos.pop(0)
+                    next_addr, next_lineno = linenos.pop(0)
             x.co_lnotab = current_lineno
 
     def calc_lnotab(self):
@@ -167,7 +167,7 @@ class BytecodeGraph():
         prev_offset = self.head.addr
 
         for current in self.nodes():
-            if current.co_lnotab == prev_lineno:
+            if current.co_lnotab == prev_lineno or not current.co_lnotab:
                 continue
 
             new_offset = current.co_lnotab - prev_lineno
